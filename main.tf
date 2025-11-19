@@ -32,7 +32,7 @@ resource "aws_subnet" "public" {
     var.common_tags,
     var.public_subnet_tags,
     {
-      Name = "${var.project_name}-${var.environment}-public-${local.az_names[count.index]}"
+      Name = "${local.resource_name}-public-${local.az_names[count.index]}"
     }
   )
 }
@@ -67,3 +67,63 @@ resource "aws_subnet" "db" {
   )
 }
 
+#elastic ip
+resource "aws_eip" "nat"{
+  domain = vpc
+}
+
+
+resource "aws_nat_gateway" "example" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.public[0].id
+
+  tags = merge(
+    var.common_tags,
+    var.nat_gw_tags,
+    {
+    Name = local.resource_name
+    }
+  )
+  # To ensure proper ordering, it is recommended to add an explicit dependency
+  # on the Internet Gateway for the VPC.
+  depends_on = [aws_internet_gateway.main]
+}
+
+#Public route table
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
+
+  tags = merge(
+    var.common_tags,
+    var.public_routetable_tags,
+    {
+      Name = "${local.resource_name}-public"
+    }
+  )
+}
+
+#Private route table
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.main.id
+
+  tags = merge(
+    var.common_tags,
+    var.private_routetable_tags,
+    {
+      Name = "${local.resource_name}-private"
+    }
+  )
+}
+
+# database route table
+resource "aws_route_table" "db" {
+  vpc_id = aws_vpc.main.id
+
+  tags = merge(
+    var.common_tags,
+    var.database_routetable_tags,
+    {
+      Name = "${local.resource_name}-database"
+    }
+  )
+}

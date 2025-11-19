@@ -64,3 +64,19 @@ variable "db_subnet_tags" {
   default = {}
 }
 
+variable "nat_gw_tags" {
+  default = {}
+}
+
+variable "public_routetable_tags" {
+  default = {}
+}
+
+variable "private_routetable_tags" {
+  default = {}
+}
+
+variable "database_routetable_tags" {
+  default = {}
+}
+
